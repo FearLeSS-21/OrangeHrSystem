@@ -43,7 +43,7 @@ public class EmployeeModel {
             name = "employee_expertise",
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "expertise_id"))
-    private Set<com.example.hrsystem.models.ExpertiseModel> expertise = new HashSet<>();
+    private Set<ExpertiseModel> expertise = new HashSet<>();
 
     private Double grossSalary;
 

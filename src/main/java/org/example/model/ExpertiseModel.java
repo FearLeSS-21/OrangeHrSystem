@@ -1,4 +1,4 @@
-package com.example.hrsystem.models;
+package org.example.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
