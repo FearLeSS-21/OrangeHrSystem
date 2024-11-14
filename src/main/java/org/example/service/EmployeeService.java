@@ -1,13 +1,18 @@
 package org.example.service;
 
 import org.example.DTO.EmployeeDTO;
+import org.example.model.DepartmentModel;
 import org.example.model.EmployeeModel;
+import org.example.model.TeamModel;
+import org.example.repository.DepartmentRepository;
 import org.example.repository.EmployeeRepository;
+import org.example.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,58 +21,69 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    // Convert entity to DTO
-    private EmployeeDTO convertToDTO(EmployeeModel employeeModel) {
-        return new EmployeeDTO(
-                employeeModel.getId(),
-                employeeModel.getName(),
-                employeeModel.getGender(),
-                employeeModel.getDateOfBirth(),
-                employeeModel.getGraduationDate(),
-                employeeModel.getDepartment() != null ? employeeModel.getDepartment().getId() : null,
-                employeeModel.getManager() != null ? employeeModel.getManager().getId() : null,
-                employeeModel.getTeam() != null ? employeeModel.getTeam().getId() : null,
-                employeeModel.getGrossSalary(),
-                employeeModel.getNetSalary()
-        );
-    }
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
-    // Convert DTO to entity
-    private EmployeeModel convertToEntity(EmployeeDTO employeeDTO) {
-        EmployeeModel employeeModel = new EmployeeModel();
-        employeeModel.setId(employeeDTO.getId());
-        employeeModel.setName(employeeDTO.getName());
-        employeeModel.setGender(employeeDTO.getGender());
-        employeeModel.setDateOfBirth(employeeDTO.getDateOfBirth());
-        employeeModel.setGraduationDate(employeeDTO.getGraduationDate());
-        // You can map the department, manager, and team by ID if needed
-        employeeModel.setGrossSalary(employeeDTO.getGrossSalary());
-        employeeModel.setNetSalary(employeeDTO.getNetSalary());
-        return employeeModel;
-    }
+    @Autowired
+    private TeamRepository teamRepository;
 
-    // Create or update an employee
     public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
-        EmployeeModel employeeModel = convertToEntity(employeeDTO);
-        employeeModel.calculateNetSalary();  // Calculate net salary before saving
-        employeeModel = employeeRepository.save(employeeModel);
-        return convertToDTO(employeeModel);
+        EmployeeModel employee = new EmployeeModel();
+        employee.setName(employeeDTO.getName());
+        employee.setGender(employeeDTO.getGender());
+        employee.setDateOfBirth(employeeDTO.getDateOfBirth());
+        employee.setGraduationDate(employeeDTO.getGraduationDate());
+        employee.setGrossSalary(employeeDTO.getGrossSalary());
+
+        // Set expertise as strings directly
+        employee.setExpertise(employeeDTO.getExpertise());
+
+        // Calculate and set net salary
+        employee.calculateNetSalary();
+
+        // Optional: Set department, manager, and team if IDs are provided
+        if (employeeDTO.getDepartmentId() != null) {
+            Optional<DepartmentModel> department = departmentRepository.findById(employeeDTO.getDepartmentId());
+            department.ifPresent(employee::setDepartment);
+        }
+
+        if (employeeDTO.getManagerId() != null) {
+            Optional<EmployeeModel> manager = employeeRepository.findById(employeeDTO.getManagerId());
+            manager.ifPresent(employee::setManager);
+        }
+
+        if (employeeDTO.getTeamId() != null) {
+            Optional<TeamModel> team = teamRepository.findById(employeeDTO.getTeamId());
+            team.ifPresent(employee::setTeam);
+        }
+
+        EmployeeModel savedEmployee = employeeRepository.save(employee);
+        return convertToDTO(savedEmployee);
     }
 
-    // Get all employees
     public List<EmployeeDTO> getAllEmployees() {
-        return employeeRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        List<EmployeeModel> employees = employeeRepository.findAll();
+        return employees.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    // Get employee by ID
     public Optional<EmployeeDTO> getEmployeeById(Long id) {
-        return employeeRepository.findById(id).map(this::convertToDTO);
+        Optional<EmployeeModel> employee = employeeRepository.findById(id);
+        return employee.map(this::convertToDTO);
     }
 
-    // Delete employee by ID
-    public void deleteEmployee(Long id) {
-        employeeRepository.deleteById(id);
+    private EmployeeDTO convertToDTO(EmployeeModel employee) {
+        EmployeeDTO dto = new EmployeeDTO();
+        dto.setId(employee.getId());
+        dto.setName(employee.getName());
+        dto.setGender(employee.getGender());
+        dto.setDateOfBirth(employee.getDateOfBirth());
+        dto.setGraduationDate(employee.getGraduationDate());
+        dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
+        dto.setManagerId(employee.getManager() != null ? employee.getManager().getId() : null);
+        dto.setTeamId(employee.getTeam() != null ? employee.getTeam().getId() : null);
+        dto.setExpertise(employee.getExpertise());  // Set expertise as strings
+        dto.setGrossSalary(employee.getGrossSalary());
+        dto.setNetSalary(employee.getNetSalary());
+        return dto;
     }
 }

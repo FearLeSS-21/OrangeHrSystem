@@ -38,12 +38,10 @@ public class EmployeeModel {
     @JoinColumn(name = "team_id")
     private TeamModel team;
 
-    @ManyToMany
-    @JoinTable(
-            name = "employee_expertise",
-            joinColumns = @JoinColumn(name = "employee_id"),
-            inverseJoinColumns = @JoinColumn(name = "expertise_id"))
-    private Set<ExpertiseModel> expertise = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "employee_expertise", joinColumns = @JoinColumn(name = "employee_id"))
+    @Column(name = "expertise")
+    private Set<String> expertise = new HashSet<>();
 
     private Double grossSalary;
 
