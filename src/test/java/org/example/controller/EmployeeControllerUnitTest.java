@@ -1,8 +1,7 @@
-package com.example.hrsystem.tests;
+package org.example.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.controller.EmployeeController;
-import org.example.model.EmployeeModel;
+import org.example.DTO.EmployeeDTO;
 import org.example.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,64 +25,58 @@ public class EmployeeControllerUnitTest {
     private EmployeeController employeeController;
 
     private MockMvc mockMvc;
-    private EmployeeModel employee;
+    private EmployeeDTO employeeDTO;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(employeeController).build();
 
-        employee = new Employee();
-        employee.setName("John Doe");
-        employee.setGrossSalary(5000);
-        employee.setNetSalary(5000 - (5000 * 0.15) - 500);  // Calculate net salary
+        employeeDTO = new EmployeeDTO();
+        employeeDTO.setName("John Doe");
+        employeeDTO.setGrossSalary(5000.0);
+        // Call the method to calculate net salary
+        employeeDTO.setNetSalary(5000 - (5000 * 0.15) - 500);  // Calculate net salary manually for test
     }
 
     @Test
+        // Test for adding a new employee
     void testAddEmployee() throws Exception {
-        when(employeeService.addEmployee(any(Employee.class))).thenReturn(employee);
+        when(employeeService.saveEmployee(any(EmployeeDTO.class))).thenReturn(employeeDTO);
 
-        mockMvc.perform(post("/api/employees")
+        mockMvc.perform(post("/employees")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(employee)))
+                        .content(new ObjectMapper().writeValueAsString(employeeDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"))
-                .andExpect(jsonPath("$.netSalary").value(employee.getNetSalary()));
+                .andExpect(jsonPath("$.netSalary").value(employeeDTO.getNetSalary()));
 
-        verify(employeeService, times(1)).addEmployee(any(Employee.class));
+        verify(employeeService, times(1)).saveEmployee(any(EmployeeDTO.class));
     }
 
     @Test
+        // Test for updating an existing employee
     void testUpdateEmployee() throws Exception {
-        when(employeeService.updateEmployee(anyLong(), any(Employee.class))).thenReturn(employee);
+        when(employeeService.saveEmployee(any(EmployeeDTO.class))).thenReturn(employeeDTO);
 
-        mockMvc.perform(put("/api/employees/1")
+        mockMvc.perform(put("/employees/1")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(employee)))
+                        .content(new ObjectMapper().writeValueAsString(employeeDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"));
 
-        verify(employeeService, times(1)).updateEmployee(anyLong(), any(Employee.class));
+        verify(employeeService, times(1)).saveEmployee(any(EmployeeDTO.class));
     }
 
     @Test
-    void testDeleteEmployee() throws Exception {
-        doNothing().when(employeeService).deleteEmployee(anyLong());
-
-        mockMvc.perform(delete("/api/employees/1"))
-                .andExpect(status().isOk());
-
-        verify(employeeService, times(1)).deleteEmployee(anyLong());
-    }
-
-    @Test
+        // Test for getting an employee by ID
     void testGetEmployee() throws Exception {
-        when(employeeService.getEmployee(anyLong())).thenReturn(employee);
+        when(employeeService.getEmployeeById(anyLong())).thenReturn(java.util.Optional.ofNullable(employeeDTO));
 
-        mockMvc.perform(get("/api/employees/1"))
+        mockMvc.perform(get("/employees/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"));
 
-        verify(employeeService, times(1)).getEmployee(anyLong());
+        verify(employeeService, times(1)).getEmployeeById(anyLong());
     }
 }

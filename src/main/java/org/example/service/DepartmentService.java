@@ -43,8 +43,4 @@ public class DepartmentService {
     public Optional<DepartmentDTO> getDepartmentById(Long id) {
         return departmentRepository.findById(id).map(this::convertToDTO);
     }
-
-    public void deleteDepartment(Long id) {
-        departmentRepository.deleteById(id);
-    }
 }
