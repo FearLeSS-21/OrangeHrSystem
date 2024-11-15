@@ -16,7 +16,6 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    // Create employee
     @PostMapping
     public ResponseEntity<EmployeeDTO> createEmployee(@RequestBody EmployeeDTO employeeDTO) {
         EmployeeDTO savedEmployee = employeeService.saveEmployee(employeeDTO);
@@ -26,7 +25,7 @@ public class EmployeeController {
     // Update employee
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeDTO> updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
-        employeeDTO.setId(id);  // Ensure the ID is set for update
+        employeeDTO.setId(id);
         EmployeeDTO updatedEmployee = employeeService.saveEmployee(employeeDTO);
         return ResponseEntity.ok(updatedEmployee);
     }
@@ -44,4 +43,5 @@ public class EmployeeController {
         Optional<EmployeeDTO> employee = employeeService.getEmployeeById(id);
         return employee.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 }

@@ -1,8 +1,8 @@
 package com.example.hrsystem.tests;
 
-import com.example.hrsystem.models.Employee;
-import com.example.hrsystem.repositories.EmployeeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.model.EmployeeModel;
+import org.example.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +29,14 @@ public class EmployeeControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+
     private EmployeeRepository employeeRepository;
 
-    private Employee employee;
+    private EmployeeModel employee;
 
     @BeforeEach
     void setUp() {
-        employee = new Employee();
+        employee = new EmployeeModel();
         employee.setName("John Doe");
         employee.setGrossSalary(5000);
         employee.setNetSalary(0); // will be calculated in the service

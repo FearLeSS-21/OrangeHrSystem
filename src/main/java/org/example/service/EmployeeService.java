@@ -1,5 +1,6 @@
 package org.example.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.DTO.EmployeeDTO;
 import org.example.model.DepartmentModel;
 import org.example.model.EmployeeModel;
@@ -7,12 +8,12 @@ import org.example.model.TeamModel;
 import org.example.repository.DepartmentRepository;
 import org.example.repository.EmployeeRepository;
 import org.example.repository.TeamRepository;
+import org.example.util.ObjectMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +28,8 @@ public class EmployeeService {
     @Autowired
     private TeamRepository teamRepository;
 
+    private static final ObjectMapper objectMapper = ObjectMapperUtil.getObjectMapper();
+
     public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
         EmployeeModel employee = new EmployeeModel();
         employee.setName(employeeDTO.getName());
@@ -34,14 +37,9 @@ public class EmployeeService {
         employee.setDateOfBirth(employeeDTO.getDateOfBirth());
         employee.setGraduationDate(employeeDTO.getGraduationDate());
         employee.setGrossSalary(employeeDTO.getGrossSalary());
-
-        // Set expertise as strings directly
         employee.setExpertise(employeeDTO.getExpertise());
-
-        // Calculate and set net salary
         employee.calculateNetSalary();
 
-        // Optional: Set department, manager, and team if IDs are provided
         if (employeeDTO.getDepartmentId() != null) {
             Optional<DepartmentModel> department = departmentRepository.findById(employeeDTO.getDepartmentId());
             department.ifPresent(employee::setDepartment);
@@ -80,8 +78,10 @@ public class EmployeeService {
         dto.setGraduationDate(employee.getGraduationDate());
         dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
         dto.setManagerId(employee.getManager() != null ? employee.getManager().getId() : null);
+        dto.setManagerName(employee.getManager() != null ? employee.getManager().getName() : null);
         dto.setTeamId(employee.getTeam() != null ? employee.getTeam().getId() : null);
-        dto.setExpertise(employee.getExpertise());  // Set expertise as strings
+        dto.setTeamName(employee.getTeam() != null ? employee.getTeam().getName() : null);
+        dto.setExpertise(employee.getExpertise());
         dto.setGrossSalary(employee.getGrossSalary());
         dto.setNetSalary(employee.getNetSalary());
         return dto;

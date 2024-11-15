@@ -1,8 +1,9 @@
 package com.example.hrsystem.tests;
 
-import com.example.hrsystem.models.Employee;
-import com.example.hrsystem.services.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.controller.EmployeeController;
+import org.example.model.EmployeeModel;
+import org.example.service.EmployeeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ public class EmployeeControllerUnitTest {
     private EmployeeController employeeController;
 
     private MockMvc mockMvc;
-    private Employee employee;
+    private EmployeeModel employee;
 
     @BeforeEach
     void setUp() {
