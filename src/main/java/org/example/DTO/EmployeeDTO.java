@@ -16,7 +16,7 @@ public class EmployeeDTO {
     private String name;
 
     @NotNull(message = "Gender cannot be null")
-    @Pattern(regexp = "^(Male|Female|Other)$", message = "Gender must be 'Male', 'Female' or 'Other'")
+    @Pattern(regexp = "^(Male|Female)$", message = "Gender must be 'Male', 'Female'")
     private String gender;
 
     @NotNull(message = "Date of birth cannot be null")

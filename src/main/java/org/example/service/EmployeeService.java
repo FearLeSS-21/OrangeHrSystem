@@ -1,7 +1,7 @@
 package org.example.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.DTO.EmployeeDTO;
+import org.example.Exception.FieldCannotBeNullException;
 import org.example.model.DepartmentModel;
 import org.example.model.EmployeeModel;
 import org.example.model.TeamModel;
@@ -28,9 +28,11 @@ public class EmployeeService {
     @Autowired
     private TeamRepository teamRepository;
 
-    private static final ObjectMapper objectMapper = ObjectMapperUtil.getObjectMapper();
 
     public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
+        // Validate non-null fields
+        validateEmployeeFields(employeeDTO);
+
         EmployeeModel employee = new EmployeeModel();
         employee.setName(employeeDTO.getName());
         employee.setGender(employeeDTO.getGender());
@@ -67,6 +69,34 @@ public class EmployeeService {
     public Optional<EmployeeDTO> getEmployeeById(Long id) {
         Optional<EmployeeModel> employee = employeeRepository.findById(id);
         return employee.map(this::convertToDTO);
+    }
+
+    private void validateEmployeeFields(EmployeeDTO employeeDTO) {
+        if (employeeDTO.getId() == null) {
+            throw new FieldCannotBeNullException("Employee ID cannot be null");
+        }
+        if (employeeDTO.getName() == null || employeeDTO.getName().isEmpty()) {
+            throw new FieldCannotBeNullException("Employee name cannot be null or empty");
+        }
+        if (employeeDTO.getGender() == null || employeeDTO.getGender().isEmpty()) {
+            throw new FieldCannotBeNullException("Gender cannot be null or empty");
+        }
+        if (employeeDTO.getDateOfBirth() == null || employeeDTO.getDateOfBirth().isEmpty()) {
+            throw new FieldCannotBeNullException("Date of birth cannot be null or empty");
+        }
+        if (employeeDTO.getGraduationDate() == null || employeeDTO.getGraduationDate().isEmpty()) {
+            throw new FieldCannotBeNullException("Graduation date cannot be null or empty");
+        }
+        if (employeeDTO.getDepartmentId() == null) {
+            throw new FieldCannotBeNullException("Department ID cannot be null");
+        }
+        if (employeeDTO.getExpertise() == null || employeeDTO.getExpertise().isEmpty()) {
+            throw new FieldCannotBeNullException("Expertise cannot be null or empty");
+        }
+        if (employeeDTO.getGrossSalary() == null) {
+            throw new FieldCannotBeNullException("Gross salary cannot be null");
+        }
+
     }
 
     private EmployeeDTO convertToDTO(EmployeeModel employee) {
