@@ -10,6 +10,5 @@ import java.util.Optional;
 @Repository
 public interface TeamRepository extends JpaRepository<TeamModel, Long> {
 
-    // Custom query to find team by name
     Optional<TeamModel> findByName(String name);
 }

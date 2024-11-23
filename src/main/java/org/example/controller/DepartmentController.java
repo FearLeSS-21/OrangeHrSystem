@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import jakarta.validation.Valid;
 import org.example.DTO.DepartmentDTO;
 import org.example.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +16,12 @@ public class DepartmentController {
     @Autowired
     private DepartmentService departmentService;
 
-    // Create department
     @PostMapping
-    public ResponseEntity<DepartmentDTO> createDepartment(@RequestBody DepartmentDTO departmentDTO) {
+    public ResponseEntity<DepartmentDTO> createDepartment(@Valid @RequestBody DepartmentDTO departmentDTO) {
         DepartmentDTO savedDepartment = departmentService.saveDepartment(departmentDTO);
         return ResponseEntity.ok(savedDepartment);
     }
 
-    // Get all departments
     @GetMapping
     public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
         List<DepartmentDTO> departments = departmentService.getAllDepartments();

@@ -5,8 +5,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.time.LocalDate;
+
 
 @Entity
 @Data
@@ -22,9 +25,9 @@ public class EmployeeModel {
 
     private String gender;
 
-    private String dateOfBirth;
+    private LocalDate dateOfBirth;
+    private LocalDate graduationDate;
 
-    private String graduationDate;
 
     @ManyToOne
     @JoinColumn(name = "department_id")

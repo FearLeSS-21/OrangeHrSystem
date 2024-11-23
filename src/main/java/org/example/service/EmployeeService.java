@@ -8,10 +8,9 @@ import org.example.model.TeamModel;
 import org.example.repository.DepartmentRepository;
 import org.example.repository.EmployeeRepository;
 import org.example.repository.TeamRepository;
-import org.example.util.ObjectMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,9 +27,7 @@ public class EmployeeService {
     @Autowired
     private TeamRepository teamRepository;
 
-
-    public EmployeeDTO saveEmployee(EmployeeDTO employeeDTO) {
-        // Validate non-null fields
+    public EmployeeDTO saveEmployee(@Valid EmployeeDTO employeeDTO) {
         validateEmployeeFields(employeeDTO);
 
         EmployeeModel employee = new EmployeeModel();
@@ -72,19 +69,16 @@ public class EmployeeService {
     }
 
     private void validateEmployeeFields(EmployeeDTO employeeDTO) {
-        if (employeeDTO.getId() == null) {
-            throw new FieldCannotBeNullException("Employee ID cannot be null");
-        }
         if (employeeDTO.getName() == null || employeeDTO.getName().isEmpty()) {
             throw new FieldCannotBeNullException("Employee name cannot be null or empty");
         }
         if (employeeDTO.getGender() == null || employeeDTO.getGender().isEmpty()) {
             throw new FieldCannotBeNullException("Gender cannot be null or empty");
         }
-        if (employeeDTO.getDateOfBirth() == null || employeeDTO.getDateOfBirth().isEmpty()) {
+        if (employeeDTO.getDateOfBirth() == null) {
             throw new FieldCannotBeNullException("Date of birth cannot be null or empty");
         }
-        if (employeeDTO.getGraduationDate() == null || employeeDTO.getGraduationDate().isEmpty()) {
+        if (employeeDTO.getGraduationDate() == null) {
             throw new FieldCannotBeNullException("Graduation date cannot be null or empty");
         }
         if (employeeDTO.getDepartmentId() == null) {
@@ -94,26 +88,17 @@ public class EmployeeService {
             throw new FieldCannotBeNullException("Expertise cannot be null or empty");
         }
         if (employeeDTO.getGrossSalary() == null) {
-            throw new FieldCannotBeNullException("Gross salary cannot be null");
+            throw new FieldCannotBeNullException("Gross salary cannot be null or empty");
         }
-
     }
-
     private EmployeeDTO convertToDTO(EmployeeModel employee) {
-        EmployeeDTO dto = new EmployeeDTO();
-        dto.setId(employee.getId());
-        dto.setName(employee.getName());
-        dto.setGender(employee.getGender());
-        dto.setDateOfBirth(employee.getDateOfBirth());
-        dto.setGraduationDate(employee.getGraduationDate());
-        dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
-        dto.setManagerId(employee.getManager() != null ? employee.getManager().getId() : null);
-        dto.setManagerName(employee.getManager() != null ? employee.getManager().getName() : null);
-        dto.setTeamId(employee.getTeam() != null ? employee.getTeam().getId() : null);
-        dto.setTeamName(employee.getTeam() != null ? employee.getTeam().getName() : null);
-        dto.setExpertise(employee.getExpertise());
-        dto.setGrossSalary(employee.getGrossSalary());
-        dto.setNetSalary(employee.getNetSalary());
-        return dto;
+        EmployeeDTO employeeDTO = new EmployeeDTO();
+        employeeDTO.setName(employee.getName());
+        employeeDTO.setGender(employee.getGender());
+        employeeDTO.setDateOfBirth(employee.getDateOfBirth());
+        employeeDTO.setGraduationDate(employee.getGraduationDate());
+        employeeDTO.setGrossSalary(employee.getGrossSalary());
+        employeeDTO.setExpertise(employee.getExpertise());
+        return employeeDTO;
     }
 }

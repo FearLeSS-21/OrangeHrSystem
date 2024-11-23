@@ -11,9 +11,6 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class TeamDTO {
 
-    @NotNull(message = "Team ID cannot be null")
-    private Long id;
-
     @NotNull(message = "Team name cannot be null")
     @Size(min = 1, max = 100, message = "Team name must be between 1 and 100 characters")
     private String name;
