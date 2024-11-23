@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import jakarta.validation.Valid;
 import org.example.DTO.TeamDTO;
 import org.example.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,17 +16,13 @@ public class TeamController {
     @Autowired
     private TeamService teamService;
 
-    // Create team
     @PostMapping
-    public ResponseEntity<TeamDTO> createTeam(@RequestBody TeamDTO teamDTO) {
-        TeamDTO savedTeam = teamService.saveTeam(teamDTO);
-        return ResponseEntity.ok(savedTeam);
+    public ResponseEntity<TeamDTO> createTeam(@RequestBody @Valid TeamDTO teamDTO) {
+        return ResponseEntity.ok(teamService.saveTeam(teamDTO));
     }
 
-    // Get all teams
     @GetMapping
     public ResponseEntity<List<TeamDTO>> getAllTeams() {
-        List<TeamDTO> teams = teamService.getAllTeams();
-        return ResponseEntity.ok(teams);
+        return ResponseEntity.ok(teamService.getAllTeams());
     }
 }

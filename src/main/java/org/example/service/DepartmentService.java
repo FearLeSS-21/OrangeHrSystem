@@ -18,11 +18,10 @@ public class DepartmentService {
 
     public DepartmentDTO saveDepartment(DepartmentDTO departmentDTO) {
         DepartmentModel departmentModel = new DepartmentModel();
-        departmentModel.setId(departmentDTO.getId());
         departmentModel.setName(departmentDTO.getName());
 
         departmentModel = departmentRepository.save(departmentModel);
-        return new DepartmentDTO(departmentModel.getId(), departmentModel.getName());
+        return new DepartmentDTO(departmentModel.getName());
     }
 
     public List<DepartmentDTO> getAllDepartments() {
@@ -31,8 +30,6 @@ public class DepartmentService {
             throw new ResourceNotFoundException("No departments found");
         }
 
-        return departments.stream()
-                .map(department -> new DepartmentDTO(department.getId(), department.getName()))
-                .collect(Collectors.toList());
+        return departments.stream().map(department -> new DepartmentDTO(department.getName())).collect(Collectors.toList());
     }
 }

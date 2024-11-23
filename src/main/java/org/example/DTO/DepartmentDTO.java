@@ -11,9 +11,6 @@ import jakarta.validation.constraints.Size;
 @AllArgsConstructor
 public class DepartmentDTO {
 
-    @NotNull(message = "Department ID cannot be null")
-    private Long id;
-
     @NotNull(message = "Department name cannot be null")
     @Size(min = 1, max = 100, message = "Department name must be between 1 and 100 characters")
     private String name;
