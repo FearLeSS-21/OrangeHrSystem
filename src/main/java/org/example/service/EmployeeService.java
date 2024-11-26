@@ -5,12 +5,12 @@ import org.example.Exception.FieldCannotBeNullException;
 import org.example.model.DepartmentModel;
 import org.example.model.EmployeeModel;
 import org.example.model.TeamModel;
-import org.example.repository.DepartmentRepository;
 import org.example.repository.EmployeeRepository;
-import org.example.repository.TeamRepository;
+import org.example.Mapper.EmployeeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,50 +22,50 @@ public class EmployeeService {
     private EmployeeRepository employeeRepository;
 
     @Autowired
-    private DepartmentRepository departmentRepository;
+    private DepartmentService departmentService;
 
     @Autowired
-    private TeamRepository teamRepository;
+    private TeamService teamService;
 
     public EmployeeDTO saveEmployee(@Valid EmployeeDTO employeeDTO) {
         validateEmployeeFields(employeeDTO);
 
-        EmployeeModel employee = new EmployeeModel();
-        employee.setName(employeeDTO.getName());
-        employee.setGender(employeeDTO.getGender());
-        employee.setDateOfBirth(employeeDTO.getDateOfBirth());
-        employee.setGraduationDate(employeeDTO.getGraduationDate());
-        employee.setGrossSalary(employeeDTO.getGrossSalary());
-        employee.setExpertise(employeeDTO.getExpertise());
-        employee.calculateNetSalary();
+        EmployeeModel employee = EmployeeMapper.INSTANCE.toModel(employeeDTO); // Use mapper to convert DTO to model
 
+        // Set relationships like manager, department, and team as before
         if (employeeDTO.getDepartmentId() != null) {
-            Optional<DepartmentModel> department = departmentRepository.findById(employeeDTO.getDepartmentId());
-            department.ifPresent(employee::setDepartment);
+            Optional<DepartmentModel> department = departmentService.getDepartmentById(employeeDTO.getDepartmentId());
+            employee.setDepartment(department.orElse(null));
         }
 
         if (employeeDTO.getManagerId() != null) {
             Optional<EmployeeModel> manager = employeeRepository.findById(employeeDTO.getManagerId());
-            manager.ifPresent(employee::setManager);
+            if (manager.isPresent()) {
+                employee.setManager(manager.get());
+            } else {
+                throw new FieldCannotBeNullException("No manager found with ID: " + employeeDTO.getManagerId());
+            }
         }
 
         if (employeeDTO.getTeamId() != null) {
-            Optional<TeamModel> team = teamRepository.findById(employeeDTO.getTeamId());
-            team.ifPresent(employee::setTeam);
+            Optional<TeamModel> team = teamService.getTeamById(employeeDTO.getTeamId());
+            employee.setTeam(team.orElse(null));
         }
 
         EmployeeModel savedEmployee = employeeRepository.save(employee);
-        return convertToDTO(savedEmployee);
+        return EmployeeMapper.INSTANCE.toDTO(savedEmployee); // Convert back to DTO
     }
 
     public List<EmployeeDTO> getAllEmployees() {
         List<EmployeeModel> employees = employeeRepository.findAll();
-        return employees.stream().map(this::convertToDTO).collect(Collectors.toList());
+        return employees.stream()
+                .map(EmployeeMapper.INSTANCE::toDTO) // Use mapper to convert each model to DTO
+                .collect(Collectors.toList());
     }
 
     public Optional<EmployeeDTO> getEmployeeById(Long id) {
         Optional<EmployeeModel> employee = employeeRepository.findById(id);
-        return employee.map(this::convertToDTO);
+        return employee.map(EmployeeMapper.INSTANCE::toDTO); // Convert model to DTO if present
     }
 
     private void validateEmployeeFields(EmployeeDTO employeeDTO) {
@@ -81,24 +81,12 @@ public class EmployeeService {
         if (employeeDTO.getGraduationDate() == null) {
             throw new FieldCannotBeNullException("Graduation date cannot be null or empty");
         }
-        if (employeeDTO.getDepartmentId() == null) {
-            throw new FieldCannotBeNullException("Department ID cannot be null");
-        }
         if (employeeDTO.getExpertise() == null || employeeDTO.getExpertise().isEmpty()) {
             throw new FieldCannotBeNullException("Expertise cannot be null or empty");
         }
         if (employeeDTO.getGrossSalary() == null) {
             throw new FieldCannotBeNullException("Gross salary cannot be null or empty");
         }
-    }
-    private EmployeeDTO convertToDTO(EmployeeModel employee) {
-        EmployeeDTO employeeDTO = new EmployeeDTO();
-        employeeDTO.setName(employee.getName());
-        employeeDTO.setGender(employee.getGender());
-        employeeDTO.setDateOfBirth(employee.getDateOfBirth());
-        employeeDTO.setGraduationDate(employee.getGraduationDate());
-        employeeDTO.setGrossSalary(employee.getGrossSalary());
-        employeeDTO.setExpertise(employee.getExpertise());
-        return employeeDTO;
+
     }
 }

@@ -152,6 +152,19 @@
             <version>2.15.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.3.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.5.3.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+
 
         <!-- H2 Database -->
         <dependency>
