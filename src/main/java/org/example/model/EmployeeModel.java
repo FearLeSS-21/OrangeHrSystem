@@ -37,9 +37,12 @@ public class EmployeeModel {
     @JoinColumn(name = "manager_id")
     private EmployeeModel manager;  // Manager is another employee
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "team_id")
     private TeamModel team;
+
+
+
 
     @ElementCollection
     @CollectionTable(name = "employee_expertise", joinColumns = @JoinColumn(name = "employee_id"))
@@ -50,10 +53,10 @@ public class EmployeeModel {
 
     private Double netSalary;
 
-    // Method to calculate net salary
+
     public void calculateNetSalary() {
-        double tax = 0.15 * grossSalary;  // 15% tax
-        double insurance = 500;  // Fixed insurance amount
+        double tax = 0.15 * grossSalary;
+        double insurance = 500;
         this.netSalary = grossSalary - tax - insurance;
     }
 }

@@ -30,9 +30,8 @@ public class EmployeeService {
     public EmployeeDTO saveEmployee(@Valid EmployeeDTO employeeDTO) {
         validateEmployeeFields(employeeDTO);
 
-        EmployeeModel employee = EmployeeMapper.INSTANCE.toModel(employeeDTO); // Use mapper to convert DTO to model
+        EmployeeModel employee = EmployeeMapper.INSTANCE.toModel(employeeDTO);
 
-        // Set relationships like manager, department, and team as before
         if (employeeDTO.getDepartmentId() != null) {
             Optional<DepartmentModel> department = departmentService.getDepartmentById(employeeDTO.getDepartmentId());
             employee.setDepartment(department.orElse(null));
@@ -52,20 +51,21 @@ public class EmployeeService {
             employee.setTeam(team.orElse(null));
         }
 
+        employee.calculateNetSalary(); // Calculate the net salary before saving
         EmployeeModel savedEmployee = employeeRepository.save(employee);
-        return EmployeeMapper.INSTANCE.toDTO(savedEmployee); // Convert back to DTO
+        return EmployeeMapper.INSTANCE.toDTO(savedEmployee);
     }
 
     public List<EmployeeDTO> getAllEmployees() {
         List<EmployeeModel> employees = employeeRepository.findAll();
         return employees.stream()
-                .map(EmployeeMapper.INSTANCE::toDTO) // Use mapper to convert each model to DTO
+                .map(EmployeeMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
     }
 
     public Optional<EmployeeDTO> getEmployeeById(Long id) {
         Optional<EmployeeModel> employee = employeeRepository.findById(id);
-        return employee.map(EmployeeMapper.INSTANCE::toDTO); // Convert model to DTO if present
+        return employee.map(EmployeeMapper.INSTANCE::toDTO);
     }
 
     private void validateEmployeeFields(EmployeeDTO employeeDTO) {
@@ -87,6 +87,5 @@ public class EmployeeService {
         if (employeeDTO.getGrossSalary() == null) {
             throw new FieldCannotBeNullException("Gross salary cannot be null or empty");
         }
-
     }
 }

@@ -1,15 +1,12 @@
 package org.example.DTO;
 
 import lombok.Data;
-
 import java.time.LocalDate;
 import java.util.Set;
-
 import jakarta.validation.constraints.*;
 
 @Data
 public class EmployeeDTO {
-
 
     @NotNull(message = "Employee name cannot be null")
     @Size(min = 1, max = 100, message = "Employee name must be between 1 and 100 characters")
