@@ -9,6 +9,4 @@ import java.util.Optional;
 
 @Repository
 public interface TeamRepository extends JpaRepository<TeamModel, Long> {
-
-    Optional<TeamModel> findByName(String name);
 }

@@ -28,15 +28,19 @@ public class EmployeeService {
     private TeamService teamService;
 
     public EmployeeDTO saveEmployee(@Valid EmployeeDTO employeeDTO) {
+        // Validate employee fields
         validateEmployeeFields(employeeDTO);
 
+        // Convert DTO to model using the mapper
         EmployeeModel employee = EmployeeMapper.INSTANCE.toModel(employeeDTO);
 
+        // Set department if departmentId is provided
         if (employeeDTO.getDepartmentId() != null) {
             Optional<DepartmentModel> department = departmentService.getDepartmentById(employeeDTO.getDepartmentId());
             employee.setDepartment(department.orElse(null));
         }
 
+        // Set manager if managerId is provided
         if (employeeDTO.getManagerId() != null) {
             Optional<EmployeeModel> manager = employeeRepository.findById(employeeDTO.getManagerId());
             if (manager.isPresent()) {
@@ -44,14 +48,21 @@ public class EmployeeService {
             } else {
                 throw new FieldCannotBeNullException("No manager found with ID: " + employeeDTO.getManagerId());
             }
+        } else {
+            // If managerId is null, set manager to null explicitly
+            employee.setManager(null);
         }
 
+        // Set team if teamId is provided
         if (employeeDTO.getTeamId() != null) {
             Optional<TeamModel> team = teamService.getTeamById(employeeDTO.getTeamId());
             employee.setTeam(team.orElse(null));
         }
 
-        employee.calculateNetSalary(); // Calculate the net salary before saving
+        // Calculate net salary
+        employee.calculateNetSalary();
+
+        // Save the employee and return the saved employee as DTO
         EmployeeModel savedEmployee = employeeRepository.save(employee);
         return EmployeeMapper.INSTANCE.toDTO(savedEmployee);
     }

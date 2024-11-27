@@ -5,11 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import java.time.LocalDate;
-
 
 @Entity
 @Data
@@ -28,12 +26,11 @@ public class EmployeeModel {
     private LocalDate dateOfBirth;
     private LocalDate graduationDate;
 
-
     @ManyToOne
     @JoinColumn(name = "department_id")
     private DepartmentModel department;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)  // Cascade persist on manager
     @JoinColumn(name = "manager_id")
     private EmployeeModel manager;  // Manager is another employee
 
@@ -41,22 +38,20 @@ public class EmployeeModel {
     @JoinColumn(name = "team_id")
     private TeamModel team;
 
-
-
-
     @ElementCollection
     @CollectionTable(name = "employee_expertise", joinColumns = @JoinColumn(name = "employee_id"))
     @Column(name = "expertise")
     private Set<String> expertise = new HashSet<>();
 
     private Double grossSalary;
-
     private Double netSalary;
 
-
     public void calculateNetSalary() {
-        double tax = 0.15 * grossSalary;
-        double insurance = 500;
-        this.netSalary = grossSalary - tax - insurance;
+        // Ensure gross salary is not null before calculation
+        if (grossSalary != null) {
+            double tax = 0.15 * grossSalary;
+            double insurance = 500;
+            this.netSalary = grossSalary - tax - insurance;
+        }
     }
 }
