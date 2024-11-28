@@ -21,7 +21,7 @@
         <lombok.version>1.18.30</lombok.version>
         <mysql.version>8.0.33</mysql.version> <!-- Updated MySQL version -->
         <jakartaee.version>10.0.0</jakartaee.version>
-        <flyway.version>9.22.2</flyway.version> <!-- Updated Flyway version -->
+        <flyway.version>10.10.0</flyway.version> <!-- Updated Flyway version -->
         <spring-boot.version>3.3.2</spring-boot.version>
     </properties>
 
@@ -44,6 +44,20 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Flyway for MySQL -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
+
+        <!-- Core Flyway functionality -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
         </dependency>
 
         <!-- Jackson -->
@@ -78,13 +92,6 @@
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
             <version>2.3.1</version>
-        </dependency>
-
-        <!-- Flyway -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
         </dependency>
 
         <!-- Spring Boot -->
