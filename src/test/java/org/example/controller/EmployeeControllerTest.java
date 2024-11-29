@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,16 +34,14 @@ public class EmployeeControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Clean the Employee and Department database
         employeeRepository.deleteAll();
         departmentRepository.deleteAll();
 
-        // Create a test department
+        // Create a test department for employee assignment
         DepartmentModel testDepartment = new DepartmentModel();
         testDepartment.setName("Engineering");
         testDepartment = departmentRepository.save(testDepartment);
 
-        // Store the department ID for reference in the tests
         testDepartmentId = testDepartment.getId();
     }
 
@@ -50,27 +49,35 @@ public class EmployeeControllerTest {
     public void testCreateEmployee() throws Exception {
         mockMvc.perform(post("/employees")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.format("""
+                        .content("""
                         {
                             "name": "John Doe",
                             "gender": "Male",
                             "dateOfBirth": "1990-01-01",
                             "graduationDate": "2012-06-15",
-                            "expertise": "Software Development",
-                            "grossSalary": 60000.0,
-                            "departmentId": %d
+                            "departmentId": 1,
+                            "managerId": null,
+                            "teamId": 1,
+                            "expertise": ["Java", "Spring Boot"],
+                            "grossSalary": 75000.0
                         }
-                        """, testDepartmentId)))
+                    """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"))
                 .andExpect(jsonPath("$.gender").value("Male"))
-                .andExpect(jsonPath("$.grossSalary").value(60000.0))
-                .andExpect(jsonPath("$.departmentId").value(testDepartmentId.intValue()));
+                .andExpect(jsonPath("$.dateOfBirth").value("1990-01-01"))
+                .andExpect(jsonPath("$.graduationDate").value("2012-06-15"))
+                .andExpect(jsonPath("$.departmentId").value(1))
+                .andExpect(jsonPath("$.managerId").value(nullValue()))  // Ensure managerId is null
+                .andExpect(jsonPath("$.teamId").value(1))
+                .andExpect(jsonPath("$.expertise[0]").value("Java"))  // Check the expertise array
+                .andExpect(jsonPath("$.expertise[1]").value("Spring Boot"))
+                .andExpect(jsonPath("$.grossSalary").value(75000.0));
     }
 
     @Test
     public void testCreateEmployeeWithInvalidData() throws Exception {
-        // Test missing name
+        // Missing name field
         mockMvc.perform(post("/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format("""
@@ -83,9 +90,9 @@ public class EmployeeControllerTest {
                             "departmentId": %d
                         }
                         """, testDepartmentId)))
-                .andExpect(status().isBadRequest());  // Expect a 400 Bad Request
+                .andExpect(status().isBadRequest());
 
-        // Test invalid date format for graduationDate
+        // Invalid graduation date
         mockMvc.perform(post("/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format("""
@@ -99,12 +106,12 @@ public class EmployeeControllerTest {
                             "departmentId": %d
                         }
                         """, testDepartmentId)))
-                .andExpect(status().isBadRequest());  // Expect a 400 Bad Request
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     public void testGetEmployeeById() throws Exception {
-        // Create and save a new employee
+        // Create employee first
         String employeeJson = String.format("""
                         {
                             "name": "John Doe",
@@ -117,16 +124,17 @@ public class EmployeeControllerTest {
                         }
                         """, testDepartmentId);
 
+        // Create employee and extract the response
         String response = mockMvc.perform(post("/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(employeeJson))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        // Extract the ID of the created employee from the response (assuming it's returned in the response)
-        String employeeId = response.split(",")[0].split(":")[1].trim(); // Basic extraction (adjust as needed)
+        // Extract employee ID from the response
+        String employeeId = response.split("\"id\":")[1].split(",")[0].trim();
 
-        // Perform a GET request to retrieve the employee by ID
+        // Fetch employee by ID
         mockMvc.perform(get("/employees/{id}", employeeId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("John Doe"))

@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 public class TeamServiceTest {
 
-    @Autowired
-    private TeamService teamService;
 
     @Autowired
     private TeamRepository teamRepository;
