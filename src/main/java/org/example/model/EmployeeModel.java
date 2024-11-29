@@ -47,7 +47,7 @@ public class EmployeeModel {
     private Double netSalary;
 
     public void calculateNetSalary() {
-        // Ensure gross salary is not null before calculation
+
         if (grossSalary != null) {
             double tax = 0.15 * grossSalary;
             double insurance = 500;

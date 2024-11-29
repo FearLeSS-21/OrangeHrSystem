@@ -26,7 +26,7 @@ public class DepartmentService {
     public List<DepartmentDTO> getAllDepartments() {
         List<DepartmentModel> departments = departmentRepository.findAll();
         return departments.stream()
-                .map(DepartmentMapper.INSTANCE::toDTO) // Use mapper to convert each model to DTO
+                .map(DepartmentMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
     }
 

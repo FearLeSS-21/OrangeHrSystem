@@ -19,14 +19,14 @@ public class TeamService {
     private TeamRepository teamRepository;
 
     public TeamDTO saveTeam(@Valid TeamDTO teamDTO) {
-        TeamModel teamModel = TeamMapper.INSTANCE.toModel(teamDTO); // Use mapper to convert DTO to model
+        TeamModel teamModel = TeamMapper.INSTANCE.toModel(teamDTO);
         teamModel = teamRepository.save(teamModel);
-        return TeamMapper.INSTANCE.toDTO(teamModel); // Convert back to DTO
+        return TeamMapper.INSTANCE.toDTO(teamModel);
     }
 
     public List<TeamDTO> getAllTeams() {
         return teamRepository.findAll().stream()
-                .map(TeamMapper.INSTANCE::toDTO) // Use mapper to convert each model to DTO
+                .map(TeamMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
     }
 

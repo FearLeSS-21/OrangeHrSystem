@@ -1,93 +1,106 @@
 package org.example.service;
 
+import org.example.DTO.EmployeeDTO;
+import org.example.Exception.FieldCannotBeNullException;
 import org.example.model.DepartmentModel;
 import org.example.model.EmployeeModel;
 import org.example.model.TeamModel;
-import org.example.repository.DepartmentRepository;
 import org.example.repository.EmployeeRepository;
-import org.example.repository.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@Transactional
-public class EmployeeServiceTest {
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-    @Autowired
-    private EmployeeService employeeService;
+class EmployeeServiceTest {
 
-    @Autowired
+    @Mock
     private EmployeeRepository employeeRepository;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    @Mock
+    private DepartmentService departmentService;
 
-    @Autowired
-    private TeamRepository teamRepository;
+    @Mock
+    private TeamService teamService;
+
+    @InjectMocks
+    private EmployeeService employeeService;
+
+    private EmployeeDTO employeeDTO;
+    private EmployeeModel employeeModel;
 
     @BeforeEach
-    public void setUp() {
-        employeeRepository.deleteAll();
-        departmentRepository.deleteAll();
-        teamRepository.deleteAll();
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        employeeDTO = new EmployeeDTO();
+        employeeDTO.setName("John Doe");
+        employeeDTO.setGender("Male");
+        employeeDTO.setDateOfBirth(LocalDate.of(1990, 1, 1));
+        employeeDTO.setGraduationDate(LocalDate.of(2012, 5, 10));
+        employeeDTO.setDepartmentId(1L);
+        employeeDTO.setExpertise(Set.of("Java", "Spring"));
+        employeeDTO.setGrossSalary(5000.0);
+
+        employeeModel = new EmployeeModel();
+        employeeModel.setName("John Doe");
+        employeeModel.setGender("Male");
+        employeeModel.setDateOfBirth(LocalDate.of(1990, 1, 1));
+        employeeModel.setGraduationDate(LocalDate.of(2012, 5, 10));
+        employeeModel.setGrossSalary(5000.0);
     }
 
     @Test
-    public void testSaveEmployee() {
-        DepartmentModel department = new DepartmentModel();
-        department.setName("HR");
-        departmentRepository.save(department);
+    void saveEmployee_Success() {
+        when(employeeRepository.save(any(EmployeeModel.class))).thenReturn(employeeModel);
+        when(departmentService.getDepartmentById(1L)).thenReturn(Optional.of(new DepartmentModel()));
+        when(teamService.getTeamById(anyLong())).thenReturn(Optional.of(new TeamModel()));
 
-        TeamModel team = new TeamModel();
-        team.setName("Development");
-        teamRepository.save(team);
+        EmployeeDTO savedEmployee = employeeService.saveEmployee(employeeDTO);
 
-        EmployeeModel employee = new EmployeeModel();
-        employee.setName("John Doe");
-        employee.setGender("Male");
-        employee.setDateOfBirth(LocalDate.of(1990, 5, 10));
-        employee.setGraduationDate(LocalDate.of(2012, 6, 15));
-        employee.setDepartment(department);
-        employee.setTeam(team);
-        employee.setGrossSalary(5000.0);
-        employee.calculateNetSalary();
-
-        EmployeeModel savedEmployee = employeeRepository.save(employee);
-
-        assertNotNull(savedEmployee.getId());
+        assertNotNull(savedEmployee);
         assertEquals("John Doe", savedEmployee.getName());
-
+        assertEquals("Male", savedEmployee.getGender());
+        assertEquals(5000.0, savedEmployee.getGrossSalary());
     }
 
     @Test
-    public void testGetAllEmployees() {
-        DepartmentModel department = new DepartmentModel();
-        department.setName("IT");
-        departmentRepository.save(department);
+    void saveEmployee_Fail() {
+        employeeDTO.setName(null);
 
-        TeamModel team = new TeamModel();
-        team.setName("Marketing");
-        teamRepository.save(team);
+        FieldCannotBeNullException exception = assertThrows(FieldCannotBeNullException.class, () -> employeeService.saveEmployee(employeeDTO));
 
-        EmployeeModel employee = new EmployeeModel();
-        employee.setName("Jane Smith");
-        employee.setGender("Female");
-        employee.setDateOfBirth(LocalDate.of(1985, 4, 12));
-        employee.setGraduationDate(LocalDate.of(2008, 7, 30));
-        employee.setDepartment(department);
-        employee.setTeam(team);
-        employee.setGrossSalary(6000.0);
-        employee.calculateNetSalary();
-
-        employeeRepository.save(employee);
-
-        assertEquals(1, employeeService.getAllEmployees().size());
+        assertEquals("Employee name cannot be null or empty", exception.getMessage());
     }
+
+
+    @Test
+    void GetAllEmployees_Success() {
+        when(employeeRepository.findAll()).thenReturn(List.of(employeeModel));
+
+        List<EmployeeDTO> employees = employeeService.getAllEmployees();
+
+        assertNotNull(employees);
+        assertFalse(employees.isEmpty());
+        assertEquals(1, employees.size());
+    }
+
+    @Test
+    void getEmployeeById_Success() {
+        when(employeeRepository.findById(1L)).thenReturn(Optional.of(employeeModel));
+
+        Optional<EmployeeDTO> employee = employeeService.getEmployeeById(1L);
+
+        assertTrue(employee.isPresent());
+        assertEquals("John Doe", employee.get().getName());
+    }
+
+
 }

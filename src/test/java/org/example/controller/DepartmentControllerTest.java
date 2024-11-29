@@ -32,7 +32,6 @@ class DepartmentControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Clean up the repository before each test to avoid test data contamination
         departmentRepository.deleteAll();
     }
 
