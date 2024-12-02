@@ -18,16 +18,17 @@ public class TeamService {
     @Autowired
     private TeamRepository teamRepository;
 
+    @Autowired
+    private TeamMapper teamMapper;
+
     public TeamDTO saveTeam(@Valid TeamDTO teamDTO) {
-        TeamModel teamModel = TeamMapper.INSTANCE.toModel(teamDTO);
+        TeamModel teamModel = teamMapper.toModel(teamDTO);
         teamModel = teamRepository.save(teamModel);
-        return TeamMapper.INSTANCE.toDTO(teamModel);
+        return teamMapper.toDTO(teamModel);
     }
 
     public List<TeamDTO> getAllTeams() {
-        return teamRepository.findAll().stream()
-                .map(TeamMapper.INSTANCE::toDTO)
-                .collect(Collectors.toList());
+        return teamRepository.findAll().stream().map(teamMapper::toDTO).collect(Collectors.toList());
     }
 
     public Optional<TeamModel> getTeamById(Long id) {

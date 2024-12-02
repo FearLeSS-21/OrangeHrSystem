@@ -134,18 +134,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- MapStruct -->
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>1.5.3.Final</version>
+            <version>1.5.5.Final</version> <!-- Use the appropriate version -->
         </dependency>
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
-            <version>1.5.3.Final</version>
-            <scope>provided</scope>
+            <version>1.5.5.Final</version>
         </dependency>
+
 
         <!-- H2 Database -->
         <dependency>

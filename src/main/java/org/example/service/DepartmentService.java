@@ -17,16 +17,19 @@ public class DepartmentService {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private DepartmentMapper departmentMapper;
+
     public DepartmentDTO saveDepartment(DepartmentDTO departmentDTO) {
-        DepartmentModel departmentModel = DepartmentMapper.INSTANCE.toModel(departmentDTO);
+        DepartmentModel departmentModel = departmentMapper.toModel(departmentDTO);
         departmentModel = departmentRepository.save(departmentModel);
-        return DepartmentMapper.INSTANCE.toDTO(departmentModel); // Convert back to DTO after saving
+        return departmentMapper.toDTO(departmentModel);
     }
 
     public List<DepartmentDTO> getAllDepartments() {
         List<DepartmentModel> departments = departmentRepository.findAll();
         return departments.stream()
-                .map(DepartmentMapper.INSTANCE::toDTO)
+                .map(departmentMapper::toDTO)
                 .collect(Collectors.toList());
     }
 

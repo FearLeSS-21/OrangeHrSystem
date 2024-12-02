@@ -4,12 +4,9 @@ import org.example.DTO.EmployeeDTO;
 import org.example.model.EmployeeModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface EmployeeMapper {
-    EmployeeMapper INSTANCE = Mappers.getMapper(EmployeeMapper.class);
-
     @Mapping(source = "manager.id", target = "managerId")
     @Mapping(source = "department.id", target = "departmentId")
     @Mapping(source = "team.id", target = "teamId")
@@ -20,3 +17,5 @@ public interface EmployeeMapper {
     @Mapping(source = "teamId", target = "team.id")
     EmployeeModel toModel(EmployeeDTO employeeDTO);
 }
+
+

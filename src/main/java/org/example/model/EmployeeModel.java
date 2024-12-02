@@ -30,9 +30,9 @@ public class EmployeeModel {
     @JoinColumn(name = "department_id")
     private DepartmentModel department;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)  // Cascade persist on manager
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "manager_id")
-    private EmployeeModel manager;  // Manager is another employee
+    private EmployeeModel manager;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "team_id")

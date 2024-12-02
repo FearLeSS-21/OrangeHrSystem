@@ -8,12 +8,12 @@ import jakarta.validation.constraints.*;
 @Data
 public class EmployeeDTO {
 
-    @NotNull(message = "Employee name cannot be null")
+    @NotBlank(message = "Employee name cannot be null or empty")
     @Size(min = 1, max = 100, message = "Employee name must be between 1 and 100 characters")
     private String name;
 
-    @NotNull(message = "Gender cannot be null")
-    @Pattern(regexp = "^(Male|Female)$", message = "Gender must be 'Male', 'Female'")
+    @NotBlank(message = "Gender cannot be null or empty")
+    @Pattern(regexp = "^(Male|Female)$", message = "Gender must be 'Male' or 'Female'")
     private String gender;
 
     @NotNull(message = "Date of birth cannot be null")
