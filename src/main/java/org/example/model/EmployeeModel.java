@@ -11,6 +11,7 @@ import java.util.Set;
 
 @Entity
 @Data
+@Table(name = "employee")
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmployeeModel {

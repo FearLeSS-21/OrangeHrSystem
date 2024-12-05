@@ -9,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Data
+@Table(name = "team")
 @NoArgsConstructor
 @AllArgsConstructor
 public class TeamModel {

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 
 @Entity
 @Data
+@Table(name = "department")
 @NoArgsConstructor
 @AllArgsConstructor
 public class DepartmentModel {
