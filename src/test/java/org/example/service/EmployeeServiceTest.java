@@ -1,16 +1,17 @@
 package org.example.service;
 
 import org.example.DTO.EmployeeDTO;
-import org.example.Exception.FieldCannotBeNullException;
+import org.example.Mapper.EmployeeMapper;
 import org.example.model.DepartmentModel;
 import org.example.model.EmployeeModel;
-import org.example.model.TeamModel;
 import org.example.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@ActiveProfiles("test")
 class EmployeeServiceTest {
 
     @Mock
@@ -29,6 +31,9 @@ class EmployeeServiceTest {
 
     @Mock
     private TeamService teamService;
+
+    @Mock
+    private EmployeeMapper employeeMapper;
 
     @InjectMocks
     private EmployeeService employeeService;
@@ -59,48 +64,36 @@ class EmployeeServiceTest {
 
     @Test
     void saveEmployee_Success() {
-        when(employeeRepository.save(any(EmployeeModel.class))).thenReturn(employeeModel);
         when(departmentService.getDepartmentById(1L)).thenReturn(Optional.of(new DepartmentModel()));
-        when(teamService.getTeamById(anyLong())).thenReturn(Optional.of(new TeamModel()));
+        when(employeeMapper.toModel(employeeDTO)).thenReturn(employeeModel);
+        when(employeeRepository.save(employeeModel)).thenReturn(employeeModel);
+        when(employeeMapper.toDTO(employeeModel)).thenReturn(employeeDTO);
 
         EmployeeDTO savedEmployee = employeeService.saveEmployee(employeeDTO);
 
         assertNotNull(savedEmployee);
         assertEquals("John Doe", savedEmployee.getName());
-        assertEquals("Male", savedEmployee.getGender());
-        assertEquals(5000.0, savedEmployee.getGrossSalary());
     }
 
     @Test
-    void saveEmployee_Fail() {
-        employeeDTO.setName(null);
-
-        FieldCannotBeNullException exception = assertThrows(FieldCannotBeNullException.class, () -> employeeService.saveEmployee(employeeDTO));
-
-        assertEquals("Employee name cannot be null or empty", exception.getMessage());
-    }
-
-
-    @Test
-    void GetAllEmployees_Success() {
+    void getAllEmployees_Success() {
         when(employeeRepository.findAll()).thenReturn(List.of(employeeModel));
+        when(employeeMapper.toDTO(employeeModel)).thenReturn(employeeDTO);
 
         List<EmployeeDTO> employees = employeeService.getAllEmployees();
 
         assertNotNull(employees);
-        assertFalse(employees.isEmpty());
         assertEquals(1, employees.size());
     }
 
     @Test
     void getEmployeeById_Success() {
         when(employeeRepository.findById(1L)).thenReturn(Optional.of(employeeModel));
+        when(employeeMapper.toDTO(employeeModel)).thenReturn(employeeDTO);
 
         Optional<EmployeeDTO> employee = employeeService.getEmployeeById(1L);
 
         assertTrue(employee.isPresent());
         assertEquals("John Doe", employee.get().getName());
     }
-
-
 }

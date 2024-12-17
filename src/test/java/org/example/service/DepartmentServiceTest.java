@@ -9,72 +9,92 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DepartmentServiceTest {
+@ActiveProfiles("test")
+class DepartmentServiceTest {
 
     @Mock
     private DepartmentRepository departmentRepository;
 
+    @Mock
+    private DepartmentMapper departmentMapper;
+
     @InjectMocks
     private DepartmentService departmentService;
 
+    private DepartmentDTO departmentDTO;
+    private DepartmentModel departmentModel;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
+        departmentDTO = new DepartmentDTO("IT");
+        departmentModel = new DepartmentModel(1L, "IT");
     }
 
     @Test
-    public void testSaveDepartment() {
-        DepartmentDTO departmentDTO = new DepartmentDTO();
-        departmentDTO.setName("IT");
+    void saveDepartment() {
+        when(departmentMapper.toModel(departmentDTO)).thenReturn(departmentModel);
+        when(departmentRepository.save(departmentModel)).thenReturn(departmentModel);
+        when(departmentMapper.toDTO(departmentModel)).thenReturn(departmentDTO);
 
-        DepartmentModel departmentModel = new DepartmentModel();
-        departmentModel.setName("IT");
-
-        when(departmentRepository.save(any(DepartmentModel.class))).thenReturn(departmentModel);
-
-        DepartmentDTO savedDepartment = departmentService.saveDepartment(departmentDTO);
+        var savedDepartment = departmentService.saveDepartment(departmentDTO);
 
         assertNotNull(savedDepartment);
         assertEquals("IT", savedDepartment.getName());
-        verify(departmentRepository, times(1)).save(any(DepartmentModel.class));
     }
 
     @Test
-    public void testGetAllDepartments() {
-        DepartmentModel department1 = new DepartmentModel();
-        department1.setName("HR");
-        DepartmentModel department2 = new DepartmentModel();
-        department2.setName("Finance");
+    void saveDepartmentFailure() {
+        when(departmentMapper.toModel(departmentDTO)).thenReturn(departmentModel);
+        when(departmentRepository.save(departmentModel)).thenThrow(new RuntimeException("Save failed"));
 
-        when(departmentRepository.findAll()).thenReturn(Arrays.asList(department1, department2));
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            departmentService.saveDepartment(departmentDTO);
+        });
 
-        List<DepartmentDTO> departments = departmentService.getAllDepartments();
-
-        assertNotNull(departments);
-        assertEquals(2, departments.size());
-        verify(departmentRepository, times(1)).findAll();
+        assertEquals("Save failed", exception.getMessage());
     }
 
     @Test
-    public void testGetDepartmentById() {
-        DepartmentModel department = new DepartmentModel();
-        department.setId(1L);
-        department.setName("Operations");
+    void getAllDepartments() {
+        var departments = List.of(new DepartmentModel(2L, "HR"), new DepartmentModel(3L, "Finance"));
+        when(departmentRepository.findAll()).thenReturn(departments);
+        when(departmentMapper.toDTO(any(DepartmentModel.class))).thenAnswer(invocation -> new DepartmentDTO(((DepartmentModel) invocation.getArgument(0)).getName()));
 
-        when(departmentRepository.findById(1L)).thenReturn(Optional.of(department));
+        var result = departmentService.getAllDepartments();
 
-        Optional<DepartmentModel> foundDepartment = departmentService.getDepartmentById(1L);
+        assertEquals(2, result.size());
+        assertEquals("HR", result.get(0).getName());
+        assertEquals("Finance", result.get(1).getName());
+        verify(departmentRepository).findAll();
+    }
+
+    @Test
+    void getDepartmentByIdExists() {
+        when(departmentRepository.findById(1L)).thenReturn(Optional.of(departmentModel));
+
+        var foundDepartment = departmentService.getDepartmentById(1L);
 
         assertTrue(foundDepartment.isPresent());
-        assertEquals("Operations", foundDepartment.get().getName());
-        verify(departmentRepository, times(1)).findById(1L);
+        assertEquals("IT", foundDepartment.get().getName());
+        verify(departmentRepository).findById(1L);
+    }
+
+    @Test
+    void getDepartmentByIdNotFound() {
+        when(departmentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        var foundDepartment = departmentService.getDepartmentById(1L);
+
+        assertFalse(foundDepartment.isPresent());
+        verify(departmentRepository).findById(1L);
     }
 }

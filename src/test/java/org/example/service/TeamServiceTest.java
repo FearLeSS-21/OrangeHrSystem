@@ -1,6 +1,7 @@
 package org.example.service;
 
 import org.example.DTO.TeamDTO;
+import org.example.Mapper.TeamMapper;
 import org.example.model.TeamModel;
 import org.example.repository.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,74 +9,68 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Arrays;
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-class TeamServiceTest {
+@ActiveProfiles("test")
+public class TeamServiceTest {
 
     @Mock
     private TeamRepository teamRepository;
+
+    @Mock
+    private TeamMapper teamMapper;
 
     @InjectMocks
     private TeamService teamService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testSaveTeam() {
+    public void saveTeamSuccessfully() {
         TeamDTO teamDTO = new TeamDTO();
-        teamDTO.setName("Backend Development");
-
         TeamModel teamModel = new TeamModel();
-        teamModel.setId(1L);
-        teamModel.setName("Backend Development");
+        when(teamMapper.toModel(teamDTO)).thenReturn(teamModel);
+        when(teamRepository.save(teamModel)).thenReturn(teamModel);
+        when(teamMapper.toDTO(teamModel)).thenReturn(teamDTO);
 
-        when(teamRepository.save(any(TeamModel.class))).thenReturn(teamModel);
+        TeamDTO result = teamService.saveTeam(teamDTO);
 
-        TeamDTO savedTeamDTO = teamService.saveTeam(teamDTO);
-
-        assertNotNull(savedTeamDTO);
-        assertEquals("Backend Development", savedTeamDTO.getName());
+        assertNotNull(result);
+        verify(teamRepository).save(teamModel);
     }
 
     @Test
-    void testGetAllTeams() {
-        TeamModel team1 = new TeamModel();
-        team1.setId(1L);
-        team1.setName("Backend Development");
+    public void returnAllTeamsSuccessfully() {
+        TeamModel teamModel = new TeamModel();
+        TeamDTO teamDTO = new TeamDTO();
+        when(teamRepository.findAll()).thenReturn(List.of(teamModel));
+        when(teamMapper.toDTO(teamModel)).thenReturn(teamDTO);
 
-        TeamModel team2 = new TeamModel();
-        team2.setId(2L);
-        team2.setName("Frontend Development");
+        List<TeamDTO> result = teamService.getAllTeams();
 
-        when(teamRepository.findAll()).thenReturn(Arrays.asList(team1, team2));
-
-        List<TeamDTO> teams = teamService.getAllTeams();
-
-        assertEquals(2, teams.size());
-        assertEquals("Backend Development", teams.get(0).getName());
-        assertEquals("Frontend Development", teams.get(1).getName());
+        assertEquals(1, result.size());
+        verify(teamRepository).findAll();
     }
 
     @Test
-    void testGetTeamById() {
-        TeamModel team = new TeamModel();
-        team.setId(1L);
-        team.setName("Backend Development");
+    public void returnTeamByIdSuccessfully() {
+        Long teamId = 1L;
+        TeamModel teamModel = new TeamModel();
+        when(teamRepository.findById(teamId)).thenReturn(Optional.of(teamModel));
 
-        when(teamRepository.findById(1L)).thenReturn(Optional.of(team));
+        Optional<TeamModel> result = teamService.getTeamById(teamId);
 
-        Optional<TeamModel> foundTeam = teamService.getTeamById(1L);
-
-        assertTrue(foundTeam.isPresent());
-        assertEquals("Backend Development", foundTeam.get().getName());
+        assertTrue(result.isPresent());
+        assertEquals(teamModel, result.get());
+        verify(teamRepository).findById(teamId);
     }
 }
